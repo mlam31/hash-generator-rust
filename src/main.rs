@@ -1,3 +1,4 @@
+use std::io::{BufReader, Read};
 use std::path::Path;
 use std::{fs::File, io};
 use sha2::{Sha256, Digest};
@@ -12,19 +13,36 @@ fn input_hash(input: &str) {
 
 }
 
-fn file_hash(filepath: &str){
+fn file_hash(filepath: &str) -> std::io::Result<String>{
     // ./hash-generator --file <filepath>
     let path = Path::new(filepath);
     if path.exists(){
-        let file = File::open(filepath);
-        println!("Le fichier existe")
+        println!("> Le fichier {} existe", filepath);
+        let file = File::open(filepath)?;
+        let mut hasher = Sha256::new();
+        let mut reader = BufReader::new(file);
+
+        let mut buffer = [0u8; 4096];
+        loop {
+            let n = reader.read(&mut buffer)?;
+            if n==0 {
+                break;
+            }
+            hasher.update(&buffer[..n]);
+        }
+        let result = hasher.finalize();
+        let hash_hex = format!("{:x}", result);
+        println!("> Hash: {}", hash_hex);
+        Ok(hash_hex)
     } else {
-        println!("Le fichier n'existe pas")
-    };
+        println!(">Le fichier {} n'existe pas", filepath);
+        Err(io::Error::new(io::ErrorKind::NotFound, "Fichier introuvable"))
+    }
+    
 }
 
 fn compare_hash(file1: &str, file2: &str){
-    // ./hash-generator hash1.txt hash2.txt
+    // ./hash-generator --compare <file2> <file1>
 }
 
 
@@ -44,7 +62,8 @@ fn main() {
 
         if input.starts_with("./hash-generator --file"){
             let filename = &input["./hash-generator --file".len()..];
-            file_hash(filename);
+            println!("{}", filename);
+            let _ = file_hash(filename.trim());
             continue;
         }
         
