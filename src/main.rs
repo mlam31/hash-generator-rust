@@ -1,37 +1,60 @@
-use std::{io, result};
-use hex_literal::hex;
-use sha2::{Digest, Sha256, digest::generic_array::GenericArray};
+use std::{io};
+use sha2::{Sha256, Digest};
 
-fn input_to_hash(input: &str) -> [u8;32] {
+fn input_hash(input: &str) {
+    // ./hash-generator --input "hello world"
     let mut hasher = Sha256::new();
-    hasher.update(input);
+    hasher.update(input.as_bytes());
     let result = hasher.finalize();
-    result.into()
+    println!(">Input {}", input);
+    println!(">Hash: {:x}", result)
+
 }
 
-fn main(){
-    let guess_hash = [22, 89, 158, 100, 105, 172, 4, 38, 148, 109, 151, 245, 192, 127, 175, 192, 11, 211, 137, 36, 104, 35, 226, 95, 99, 202, 16, 107, 61, 184, 114, 201]; //bonjour
-    println!("Le hash du mot que vous devez trouver est: {:?}", guess_hash);
+fn file_hash(filename: &str){
+    // ./hash-generator --file document.pdf
+}
 
-    let mut input = String::new();
-    println!("Saisissez un mot");
-    io::stdin() // accès à l’entrée standard
-        .read_line(&mut input) // lit une ligne et la met dans `input`
-        .expect("Erreur lors de la lecture");
-    
+fn compare_hash(file1: &str, file2: &str){
+    // ./hash-generator hash1.txt hash2.txt
+}
+
+
+fn main() {
+    println!("Hash Generator (SHA-256)");
+
     loop {
-        let mut user_hash = input_to_hash(&input);
-        if user_hash == guess_hash {
-            println!("Les 2 hash correspondent !");
-            break
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Erreur lors de la lecture");
+        let input = input.trim();
+        if input.starts_with("./hash-generator --input") {
+            let text = &input["./hash-generator --input".len()..];
+            input_hash(text);
+            continue;
+        } else {
+            println!()
         }
-        else {
-            println!("\nEssayez un autre mot ");
-            println!("Le hash du mot {} est {:?}", input, user_hash);
-            io::stdin() // accès à l’entrée standard
-                .read_line(&mut input) // lit une ligne et la met dans `input`
-                .expect("Erreur lors de la lecture");
+
+        if input.starts_with("./hash-generator --file"){
+            let filename = &input["./hash-generator --file".len()..];
+            file_hash(filename);
+            continue;
+        }
+        
+        if input.starts_with("./hash-generator --compare"){
+            let rest = &input["./hash-generator --compare".len()..];
+            let files: Vec<&str> = rest.split_whitespace().collect();
+            if files.len() == 2 {
+                compare_hash(files[0], files[1]);
+                continue;
+            }
+        }
+
+        if input == "quit" || input == "exit" {
+            println!("Bye  bye");
+            break;
         }
     }
-    println!("{:?}", guess_hash)
 }

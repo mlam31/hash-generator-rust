@@ -5,4 +5,3 @@ edition = "2024"
 
 [dependencies]
 sha2 = "0.10.9"
-hex-literal = "1.0.0"
