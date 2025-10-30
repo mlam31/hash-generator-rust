@@ -1,8 +1,9 @@
-use std::{io};
+use std::path::Path;
+use std::{fs::File, io};
 use sha2::{Sha256, Digest};
 
 fn input_hash(input: &str) {
-    // ./hash-generator --input "hello world"
+    // ./hash-generator --input <user-input>
     let mut hasher = Sha256::new();
     hasher.update(input.as_bytes());
     let result = hasher.finalize();
@@ -11,8 +12,15 @@ fn input_hash(input: &str) {
 
 }
 
-fn file_hash(filename: &str){
-    // ./hash-generator --file document.pdf
+fn file_hash(filepath: &str){
+    // ./hash-generator --file <filepath>
+    let path = Path::new(filepath);
+    if path.exists(){
+        let file = File::open(filepath);
+        println!("Le fichier existe")
+    } else {
+        println!("Le fichier n'existe pas")
+    };
 }
 
 fn compare_hash(file1: &str, file2: &str){
@@ -22,7 +30,6 @@ fn compare_hash(file1: &str, file2: &str){
 
 fn main() {
     println!("Hash Generator (SHA-256)");
-
     loop {
         let mut input = String::new();
         io::stdin()
@@ -33,8 +40,6 @@ fn main() {
             let text = &input["./hash-generator --input".len()..];
             input_hash(text);
             continue;
-        } else {
-            println!()
         }
 
         if input.starts_with("./hash-generator --file"){
