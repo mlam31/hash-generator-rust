@@ -41,8 +41,17 @@ fn file_hash(filepath: &str) -> std::io::Result<String>{
     
 }
 
-fn compare_hash(file1: &str, file2: &str){
-    // ./hash-generator --compare <file2> <file1>
+fn compare_hash(filepath1: &str, filepath2: &str) -> bool{
+    // ./hash-generator --compare <filepath1> <filepath2>
+    let file1_hash = file_hash(filepath1).unwrap();
+    let file2_hash = file_hash(filepath2).unwrap();
+    if file1_hash == file2_hash {
+        println!("✅Les 2 fichiers possèdent le même hash");
+        return true
+    } else {
+        println!("❌Les 2 fichiers ne possèdent pas le même hash");
+        return false
+    }
 }
 
 
